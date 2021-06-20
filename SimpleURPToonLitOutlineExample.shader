@@ -72,6 +72,7 @@ Shader "SimpleURPToonLitExample(With Outline)"
         _ReceiveShadowMappingAmount("_ReceiveShadowMappingAmount", Range(0,1)) = 0.65
         _ReceiveShadowMappingPosOffset("_ReceiveShadowMappingPosOffset", Float) = 0
         _ShadowMapColor("_ShadowMapColor", Color) = (1,0.825,0.78)
+        [NoScaleOffset]_ShadowTexture("_ShadowTexture", 2D) = "white" {}
 
         [Header(Outline)]
         _OutlineWidth("_OutlineWidth (World Space)", Range(0,4)) = 1

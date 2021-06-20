@@ -49,7 +49,7 @@ half3 ShadeSingleLight(ToonSurfaceData surfaceData, LightingData lightingData, L
     // light's shadow map
     litOrShadowArea *= lerp(1,light.shadowAttenuation,_ReceiveShadowMappingAmount);
 
-    half3 litOrShadowColor = lerp(_ShadowMapColor,1, litOrShadowArea);
+    half3 litOrShadowColor = lerp(_ShadowMapColor*surfaceData.shadowColor,1, litOrShadowArea);
 
     half3 lightAttenuationRGB = litOrShadowColor * distanceAttenuation;
 

@@ -71,6 +71,7 @@ sampler2D _BaseMap;
 sampler2D _EmissionMap;
 sampler2D _OcclusionMap;
 sampler2D _OutlineZOffsetMaskTex;
+sampler2D _ShadowTexture;
 
 // put all your uniforms(usually things inside .shader file's properties{}) inside this CBUFFER, in order to make SRP batcher compatible
 // see -> https://blogs.unity3d.com/2019/02/28/srp-batcher-speed-up-your-rendering/
@@ -128,6 +129,7 @@ struct ToonSurfaceData
     half    alpha;
     half3   emission;
     half    occlusion;
+    half3   shadowColor;
 };
 struct LightingData
 {
@@ -247,6 +249,10 @@ half GetFinalOcculsion(Varyings input)
 
     return result;
 }
+half3 GetShadowColor(Varyings input)
+{
+    return tex2D(_ShadowTexture, input.uv).rgb;
+}
 void DoClipTestToTargetAlphaValue(half alpha) 
 {
 #if _UseAlphaClipping
@@ -268,6 +274,9 @@ ToonSurfaceData InitializeSurfaceData(Varyings input)
 
     // occlusion
     output.occlusion = GetFinalOcculsion(input);
+
+    // shadow color
+    output.shadowColor = GetShadowColor(input);
 
     return output;
 }
