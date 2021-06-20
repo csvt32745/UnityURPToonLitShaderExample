@@ -53,9 +53,18 @@ half3 ShadeSingleLight(ToonSurfaceData surfaceData, LightingData lightingData, L
 
     half3 lightAttenuationRGB = litOrShadowColor * distanceAttenuation;
 
+    half3 highlighColor = half3(0, 0, 0);
+    if(_UseAnisotropicHighlight){
+        half3 H = normalize(lightingData.viewDirectionWS + L);
+        float dotTH = dot(lightingData.tangentWS, H);
+        float sinTH = sqrt(1.0 - dotTH*dotTH);
+        float dirAtten = smoothstep(-1.0, 0.0, dotTH);
+        highlighColor = surfaceData.specular*dirAtten * pow(sinTH, _AnisotropicExponent) * _AnisotropicStrength;
+    }
+
     // saturate() light.color to prevent over bright
     // additional light reduce intensity since it is additive
-    return saturate(light.color) * lightAttenuationRGB * (isAdditionalLight ? 0.25 : 1);
+    return ((saturate(light.color)*(1.+highlighColor)) * lightAttenuationRGB) * (isAdditionalLight ? 0.25 : 1);
 }
 
 half3 ShadeEmission(ToonSurfaceData surfaceData, LightingData lightingData)

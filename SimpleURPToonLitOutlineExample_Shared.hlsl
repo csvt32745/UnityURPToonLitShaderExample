@@ -59,6 +59,7 @@ struct Varyings
     float4 positionWSAndFogFactor   : TEXCOORD1; // xyz: positionWS, w: vertex fog factor
     half3 normalWS                  : TEXCOORD2;
     float4 positionCS               : SV_POSITION;
+    half3 tangentWS                : TANGENT ; // TANGENT
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -72,6 +73,7 @@ sampler2D _EmissionMap;
 sampler2D _OcclusionMap;
 sampler2D _OutlineZOffsetMaskTex;
 sampler2D _ShadowTexture;
+sampler2D _SpecularMap;
 
 // put all your uniforms(usually things inside .shader file's properties{}) inside this CBUFFER, in order to make SRP batcher compatible
 // see -> https://blogs.unity3d.com/2019/02/28/srp-batcher-speed-up-your-rendering/
@@ -105,6 +107,13 @@ CBUFFER_START(UnityPerMaterial)
     half    _CelShadeMidPoint;
     half    _CelShadeSoftness;
 
+    // anisotropic
+    float   _UseAnisotropicHighlight;
+    float   _AnisotropicExponent;
+    float   _AnisotropicStrength;
+    half3   _SpecularMapChannelMask;
+
+
     // shadow mapping
     half    _ReceiveShadowMappingAmount;
     float   _ReceiveShadowMappingPosOffset;
@@ -129,11 +138,13 @@ struct ToonSurfaceData
     half    alpha;
     half3   emission;
     half    occlusion;
+    half    specular;
     half3   shadowColor;
 };
 struct LightingData
 {
     half3   normalWS;
+    half3   tangentWS;
     float3  positionWS;
     half3   viewDirectionWS;
     float4  shadowCoord;
@@ -166,6 +177,7 @@ Varyings VertexShaderWork(Attributes input)
     VertexNormalInputs vertexNormalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
 
     float3 positionWS = vertexInput.positionWS;
+    output.tangentWS.xyz = vertexNormalInput.tangentWS;
 
 #ifdef ToonShaderIsOutline
     positionWS = TransformPositionWSToOutlinePositionWS(vertexInput.positionWS, vertexInput.positionVS.z, vertexNormalInput.normalWS);
@@ -253,6 +265,10 @@ half3 GetShadowColor(Varyings input)
 {
     return tex2D(_ShadowTexture, input.uv).rgb;
 }
+half GetSpecularTerm(Varyings input)
+{
+    return dot(tex2D(_SpecularMap, input.uv).rgb, _SpecularMapChannelMask);
+}
 void DoClipTestToTargetAlphaValue(half alpha) 
 {
 #if _UseAlphaClipping
@@ -275,6 +291,9 @@ ToonSurfaceData InitializeSurfaceData(Varyings input)
     // occlusion
     output.occlusion = GetFinalOcculsion(input);
 
+    // specular
+    output.specular = GetSpecularTerm(input);
+
     // shadow color
     output.shadowColor = GetShadowColor(input);
 
@@ -286,6 +305,7 @@ LightingData InitializeLightingData(Varyings input)
     lightingData.positionWS = input.positionWSAndFogFactor.xyz;
     lightingData.viewDirectionWS = SafeNormalize(GetCameraPositionWS() - lightingData.positionWS);  
     lightingData.normalWS = normalize(input.normalWS); //interpolated normal is NOT unit vector, we need to normalize it
+    lightingData.tangentWS = normalize(input.tangentWS);
 
     return lightingData;
 }
