@@ -211,7 +211,7 @@ Shader "URPToonLitEyebow"
                 // If you are working on a project with lots of characters, make sure you use the above method to make Outline pass SRP-batcher friendly!
             }
 
-            Cull Front // Cull Front is a must for extra pass outline method
+            Cull Back // Cull Front is a must for extra pass outline method
             Stencil {
                 Ref 8
                 Comp Always
@@ -245,78 +245,78 @@ Shader "URPToonLitEyebow"
  
 
 
-        // ShadowCaster pass. Used for rendering URP's shadowmaps
-        Pass
-        {
-            Name "ShadowCaster"
-            Tags{"LightMode" = "ShadowCaster"}
+        // // ShadowCaster pass. Used for rendering URP's shadowmaps
+        // Pass
+        // {
+        //     Name "ShadowCaster"
+        //     Tags{"LightMode" = "ShadowCaster"}
 
-            // more explict render state to avoid confusion
-            ZWrite On // the only goal of this pass is to write depth!
-            ZTest LEqual // early exit at Early-Z stage if possible            
-            ColorMask 0 // we don't care about color, we just want to write depth, ColorMask 0 will save some write bandwidth
-            Cull Back // support Cull[_Cull] requires "flip vertex normal" using VFACE in fragment shader, which is maybe beyond the scope of a simple tutorial shader
+        //     // more explict render state to avoid confusion
+        //     ZWrite On // the only goal of this pass is to write depth!
+        //     ZTest LEqual // early exit at Early-Z stage if possible            
+        //     ColorMask 0 // we don't care about color, we just want to write depth, ColorMask 0 will save some write bandwidth
+        //     Cull Back // support Cull[_Cull] requires "flip vertex normal" using VFACE in fragment shader, which is maybe beyond the scope of a simple tutorial shader
 
-            HLSLPROGRAM
+        //     HLSLPROGRAM
 
-            // the only keywords we need in this pass = _UseAlphaClipping, which is already defined inside the HLSLINCLUDE block
-            // (so no need to write any multi_compile or shader_feature in this pass)
+        //     // the only keywords we need in this pass = _UseAlphaClipping, which is already defined inside the HLSLINCLUDE block
+        //     // (so no need to write any multi_compile or shader_feature in this pass)
 
-            #pragma vertex VertexShaderWork
-            #pragma fragment BaseColorAlphaClipTest // we only need to do Clip(), no need shading
+        //     #pragma vertex VertexShaderWork
+        //     #pragma fragment BaseColorAlphaClipTest // we only need to do Clip(), no need shading
 
-            // because it is a ShadowCaster pass, define "ToonShaderApplyShadowBiasFix" to inject "remove shadow mapping artifact" code into VertexShaderWork()
-            #define ToonShaderApplyShadowBiasFix
+        //     // because it is a ShadowCaster pass, define "ToonShaderApplyShadowBiasFix" to inject "remove shadow mapping artifact" code into VertexShaderWork()
+        //     #define ToonShaderApplyShadowBiasFix
 
-            // all shader logic written inside this .hlsl, remember to write all #define BEFORE writing #include
-            #include "SimpleURPToonLitOutlineExample_Shared.hlsl"
+        //     // all shader logic written inside this .hlsl, remember to write all #define BEFORE writing #include
+        //     #include "SimpleURPToonLitOutlineExample_Shared.hlsl"
 
-            ENDHLSL
-        }
+        //     ENDHLSL
+        // }
 
-        // DepthOnly pass. Used for rendering URP's offscreen depth prepass (you can search DepthOnlyPass.cs in URP package)
-        // For example, when depth texture is on, we need to perform this offscreen depth prepass for this toon shader. 
-        Pass
-        {
-            Name "DepthOnly"
-            Tags{"LightMode" = "DepthOnly"}
+        // // DepthOnly pass. Used for rendering URP's offscreen depth prepass (you can search DepthOnlyPass.cs in URP package)
+        // // For example, when depth texture is on, we need to perform this offscreen depth prepass for this toon shader. 
+        // Pass
+        // {
+        //     Name "DepthOnly"
+        //     Tags{"LightMode" = "DepthOnly"}
 
-            // more explict render state to avoid confusion
-            ZWrite On // the only goal of this pass is to write depth!
-            ZTest LEqual // early exit at Early-Z stage if possible            
-            ColorMask 0 // we don't care about color, we just want to write depth, ColorMask 0 will save some write bandwidth
-            Cull Back // support Cull[_Cull] requires "flip vertex normal" using VFACE in fragment shader, which is maybe beyond the scope of a simple tutorial shader
+        //     // more explict render state to avoid confusion
+        //     ZWrite On // the only goal of this pass is to write depth!
+        //     ZTest LEqual // early exit at Early-Z stage if possible            
+        //     ColorMask 0 // we don't care about color, we just want to write depth, ColorMask 0 will save some write bandwidth
+        //     Cull Back // support Cull[_Cull] requires "flip vertex normal" using VFACE in fragment shader, which is maybe beyond the scope of a simple tutorial shader
 
-            HLSLPROGRAM
+        //     HLSLPROGRAM
 
-            // the only keywords we need in this pass = _UseAlphaClipping, which is already defined inside the HLSLINCLUDE block
-            // (so no need to write any multi_compile or shader_feature in this pass)
+        //     // the only keywords we need in this pass = _UseAlphaClipping, which is already defined inside the HLSLINCLUDE block
+        //     // (so no need to write any multi_compile or shader_feature in this pass)
 
-            #pragma vertex VertexShaderWork
-            #pragma fragment BaseColorAlphaClipTest // we only need to do Clip(), no need color shading
+        //     #pragma vertex VertexShaderWork
+        //     #pragma fragment BaseColorAlphaClipTest // we only need to do Clip(), no need color shading
 
-            // because Outline area should write to depth also, define "ToonShaderIsOutline" to inject outline related code into VertexShaderWork()
-            #define ToonShaderIsOutline
+        //     // because Outline area should write to depth also, define "ToonShaderIsOutline" to inject outline related code into VertexShaderWork()
+        //     #define ToonShaderIsOutline
 
-            // all shader logic written inside this .hlsl, remember to write all #define BEFORE writing #include
-            #include "SimpleURPToonLitOutlineExample_Shared.hlsl"
+        //     // all shader logic written inside this .hlsl, remember to write all #define BEFORE writing #include
+        //     #include "SimpleURPToonLitOutlineExample_Shared.hlsl"
 
-            ENDHLSL
-        }
+        //     ENDHLSL
+        // }
 
-        // Starting from version 10.0.x, URP can generate a normal texture called _CameraNormalsTexture. 
-        // To render to this texture in your custom shader, add a Pass with the name DepthNormals. 
-        // For example, see the implementation in Lit.shader.
-        // TODO: DepthNormals pass (see URP's Lit.shader)
-        /*
-        Pass
-        {
-            Name "DepthNormals"
-            Tags{"LightMode" = "DepthNormals"}
+        // // Starting from version 10.0.x, URP can generate a normal texture called _CameraNormalsTexture. 
+        // // To render to this texture in your custom shader, add a Pass with the name DepthNormals. 
+        // // For example, see the implementation in Lit.shader.
+        // // TODO: DepthNormals pass (see URP's Lit.shader)
+        // /*
+        // Pass
+        // {
+        //     Name "DepthNormals"
+        //     Tags{"LightMode" = "DepthNormals"}
 
-            //...
-        }
-        */
+        //     //...
+        // }
+        // */
     }
 
     FallBack "Hidden/Universal Render Pipeline/FallbackError"
