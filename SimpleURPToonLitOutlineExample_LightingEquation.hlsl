@@ -21,12 +21,30 @@ half3 ShadeGI(ToonSurfaceData surfaceData, LightingData lightingData)
     return averageSH * indirectOcclusion;
 }
 
+half ShadeAnisotropic(half3 T, half3 V, half3 L, half specularTerm)
+{
+    half3 H = normalize(V + L);
+    float dotTH = dot(T, H);
+    float sinTH = sqrt(1.0 - dotTH*dotTH);
+    float dirAtten = smoothstep(-1.0, 0.0, dotTH);
+    return specularTerm * dirAtten * pow(sinTH, _SpecularExponent) * _SpecularStrength;
+}
+
+half ShadeSpecular(half3 N, half3 V, half3 L, half specularTerm)
+{
+    half3 H = normalize(V + L);
+    float dotNH = clamp(dot(N, H), 0.0, 1.0);
+    float dirAtten = smoothstep(0.0, 1.0, dotNH);
+    return specularTerm * dirAtten * pow(dotNH, _SpecularExponent) * _SpecularStrength;
+}
+
 // Most important part: lighting equation, edit it according to your needs, write whatever you want here, be creative!
 // This function will be used by all direct lights (directional/point/spot)
 half3 ShadeSingleLight(ToonSurfaceData surfaceData, LightingData lightingData, Light light, bool isAdditionalLight)
 {
     half3 N = lightingData.normalWS;
     half3 L = light.direction;
+    half3 V = lightingData.viewDirectionWS;
 
     half NoL = dot(N,L);
 
@@ -53,15 +71,9 @@ half3 ShadeSingleLight(ToonSurfaceData surfaceData, LightingData lightingData, L
 
     half3 lightAttenuationRGB = litOrShadowColor * distanceAttenuation;
 
-    half3 highlighColor = half3(0, 0, 0);
-    if(_UseAnisotropicHighlight){
-        half3 H = normalize(lightingData.viewDirectionWS + L);
-        float dotTH = dot(lightingData.tangentWS, H);
-        float sinTH = sqrt(1.0 - dotTH*dotTH);
-        float dirAtten = smoothstep(-1.0, 0.0, dotTH);
-        highlighColor = surfaceData.specular*dirAtten * pow(sinTH, _AnisotropicExponent) * _AnisotropicStrength;
-    }
-
+    half highlighColor = _UseAnisotropicHighlight?
+        ShadeAnisotropic(lightingData.tangentWS, V, L, surfaceData.specular) : ShadeSpecular(N, V, L, surfaceData.specular);
+    
     // saturate() light.color to prevent over bright
     // additional light reduce intensity since it is additive
     return ((saturate(light.color)*(1.+highlighColor)) * lightAttenuationRGB) * (isAdditionalLight ? 0.25 : 1);

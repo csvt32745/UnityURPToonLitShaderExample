@@ -68,12 +68,12 @@ Shader "SimpleURPToonLitExample(With Outline)"
         _MainLightIgnoreCelShade("_MainLightIgnoreCelShade", Range(0,1)) = 0
         _AdditionalLightIgnoreCelShade("_AdditionalLightIgnoreCelShade", Range(0,1)) = 0.9
 
-        [Header(AnisotropicHighlight)]
+        [Header(SpecularHighlight)]
         [Toggle]_UseAnisotropicHighlight("_UseAnisotropicHighlight (Mainly for hair)", Float) = 0
-        _AnisotropicExponent("_AnisotropicExponent", Float) = 16
-        _AnisotropicStrength("_AnisotropicStrength", Float) = 0.5
         [NoScaleOffset]_SpecularMap("_SpecularMap", 2D) = "white" {}
         _SpecularMapChannelMask("_SpecularMapChannelMask", Vector) = (0,1,0,0)
+        _SpecularExponent("_SpecularExponent", Float) = 16
+        _SpecularStrength("_SpecularStrength", Float) = 0.5
 
 
         [Header(Shadow mapping)]

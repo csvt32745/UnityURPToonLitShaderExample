@@ -109,8 +109,8 @@ CBUFFER_START(UnityPerMaterial)
 
     // anisotropic
     float   _UseAnisotropicHighlight;
-    float   _AnisotropicExponent;
-    float   _AnisotropicStrength;
+    float   _SpecularExponent;
+    float   _SpecularStrength;
     half3   _SpecularMapChannelMask;
 
 
@@ -177,7 +177,7 @@ Varyings VertexShaderWork(Attributes input)
     VertexNormalInputs vertexNormalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
 
     float3 positionWS = vertexInput.positionWS;
-    output.tangentWS.xyz = vertexNormalInput.tangentWS;
+    output.tangentWS = vertexNormalInput.tangentWS;
 
 #ifdef ToonShaderIsOutline
     positionWS = TransformPositionWSToOutlinePositionWS(vertexInput.positionWS, vertexInput.positionVS.z, vertexNormalInput.normalWS);
