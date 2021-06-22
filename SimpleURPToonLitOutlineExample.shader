@@ -31,6 +31,11 @@ Shader "SimpleURPToonLitExample(With Outline)"
     {
         [Header(High Level Setting)]
         [ToggleUI]_IsFace("Is Face? (please turn on if this is a face material)", Float) = 0
+        
+        [Header(Stencil Buffer)]
+        // 
+        [Enum(UnityEngine.Rendering.CompareFunction)]_UseStencil("Change to 'NotEqual' to keep the pixels", Float) = 8
+        _StencilValue("_StencilValue", Int) = 0
 
         // all properties will try to follow URP Lit shader's naming convention
         // so switching your URP lit material's shader to this toon lit shader will preserve most of the original properties if defined in this shader
@@ -146,8 +151,8 @@ Shader "SimpleURPToonLitExample(With Outline)"
             ZWrite On
             Blend One Zero
             Stencil {
-                Ref 8
-                Comp NotEqual
+                Ref [_StencilValue]
+                Comp [_UseStencil]
                 Pass Keep
                 Fail Keep
             }
@@ -212,8 +217,8 @@ Shader "SimpleURPToonLitExample(With Outline)"
 
             Cull Front // Cull Front is a must for extra pass outline method
             Stencil {
-                Ref 8
-                Comp NotEqual
+                Ref [_StencilValue]
+                Comp [_UseStencil]
                 Pass Keep
                 Fail Keep
             }

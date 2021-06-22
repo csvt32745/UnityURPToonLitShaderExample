@@ -31,7 +31,7 @@ Shader "URPToonLitEyebow"
     {
         [Header(High Level Setting)]
         [ToggleUI]_IsFace("Is Face? (please turn on if this is a face material)", Float) = 0
-
+        _StencilValue("_StencilValue", Int) = 0
         // all properties will try to follow URP Lit shader's naming convention
         // so switching your URP lit material's shader to this toon lit shader will preserve most of the original properties if defined in this shader
 
@@ -147,7 +147,7 @@ Shader "URPToonLitEyebow"
             Blend One Zero
 
             Stencil {
-                Ref 8
+                Ref [_StencilValue]
                 Comp Always
                 Pass Replace
                 Fail Replace
@@ -213,7 +213,7 @@ Shader "URPToonLitEyebow"
 
             Cull Back // Cull Front is a must for extra pass outline method
             Stencil {
-                Ref 8
+                Ref [_StencilValue]
                 Comp Always
                 Pass Replace
                 Fail Replace
