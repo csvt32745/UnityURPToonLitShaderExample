@@ -74,6 +74,10 @@ half3 ShadeSingleLight(ToonSurfaceData surfaceData, LightingData lightingData, L
     half highlighColor = _UseAnisotropicHighlight?
         ShadeAnisotropic(lightingData.tangentWS, V, L, surfaceData.specular) : ShadeSpecular(N, V, L, surfaceData.specular);
     
+    half rimLight = smoothstep(_RimLightThreshold, 1.0, 1-dot(N, V));
+
+    highlighColor += rimLight * _RimLightStrength;
+
     // saturate() light.color to prevent over bright
     // additional light reduce intensity since it is additive
     return ((saturate(light.color)*(1.+highlighColor)) * lightAttenuationRGB) * (isAdditionalLight ? 0.25 : 1);

@@ -72,6 +72,8 @@ Shader "SimpleURPToonLitExample(With Outline)"
         _CelShadeSoftness("_CelShadeSoftness", Range(0,1)) = 0.05
         _MainLightIgnoreCelShade("_MainLightIgnoreCelShade", Range(0,1)) = 0
         _AdditionalLightIgnoreCelShade("_AdditionalLightIgnoreCelShade", Range(0,1)) = 0.9
+        _RimLightThreshold("_RimLightThreshold", Range(0,1)) = 0.8
+        _RimLightStrength("_RimLightStrength", Float) = 10
 
         [Header(SpecularHighlight)]
         [Toggle]_UseAnisotropicHighlight("_UseAnisotropicHighlight (Mainly for hair)", Float) = 0

@@ -106,6 +106,8 @@ CBUFFER_START(UnityPerMaterial)
     half3   _IndirectLightMinColor;
     half    _CelShadeMidPoint;
     half    _CelShadeSoftness;
+    half    _RimLightThreshold;
+    half    _RimLightStrength;
 
     // anisotropic
     float   _UseAnisotropicHighlight;
