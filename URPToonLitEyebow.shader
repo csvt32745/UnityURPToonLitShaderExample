@@ -25,7 +25,7 @@ because:
     - we want to avoid breaking SRP batcher's batching because SRP batcher is per shader variant batching, not per shader
     - all modern GPU(include newer mobile devices) can handle static uniform branching with "almost" no performance cost
 */
-Shader "SimpleURPToonLitExample(With Outline)"
+Shader "URPToonLitEyebow"
 {
     Properties
     {
@@ -112,7 +112,7 @@ Shader "SimpleURPToonLitExample(With Outline)"
             // explict SubShader tag to avoid confusion
             "RenderType"="Opaque"
             "UniversalMaterialType" = "Lit"
-            "Queue"="Geometry"
+            "Queue"="Geometry-100"
         }
         
         // We can extract duplicated hlsl code from all passes into this HLSLINCLUDE section. Less duplicated code = Less error
@@ -145,11 +145,12 @@ Shader "SimpleURPToonLitExample(With Outline)"
             ZTest LEqual
             ZWrite On
             Blend One Zero
+
             Stencil {
                 Ref 8
-                Comp NotEqual
-                Pass Keep
-                Fail Keep
+                Comp Always
+                Pass Replace
+                Fail Replace
             }
 
             HLSLPROGRAM
@@ -184,7 +185,7 @@ Shader "SimpleURPToonLitExample(With Outline)"
 
             ENDHLSL
         }
-        
+
         // [#1 Pass - Outline]
         // Same as the above "ForwardLit" pass, but 
         // -vertex position are pushed out a bit base on normal direction
@@ -213,9 +214,9 @@ Shader "SimpleURPToonLitExample(With Outline)"
             Cull Front // Cull Front is a must for extra pass outline method
             Stencil {
                 Ref 8
-                Comp NotEqual
-                Pass Keep
-                Fail Keep
+                Comp Always
+                Pass Replace
+                Fail Replace
             }
             HLSLPROGRAM
 
@@ -242,6 +243,8 @@ Shader "SimpleURPToonLitExample(With Outline)"
             ENDHLSL
         }
  
+
+
         // ShadowCaster pass. Used for rendering URP's shadowmaps
         Pass
         {
